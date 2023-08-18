@@ -7,10 +7,10 @@
 
 
 <MudGrid Class="pa-0" Spacing="0" Style="position:relative;">
-	<MudItem xs="12">
+    <MudItem xs="12">
         <LogBoard>
         </LogBoard>
-	</MudItem>
+    </MudItem>
     <div class="ma-2" style="position:fixed; bottom: 0px; right: 0px;">
         <MudMenu AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.BottomRight">
             <ActivatorContent>
@@ -19,15 +19,16 @@
             <ChildContent>
                 <MudMenuItem @onclick="OpenCustomDialog">Custom Log Data</MudMenuItem>
                 <MudMenuItem @onclick="OpenForceReadDialog">Force Read Logs</MudMenuItem>
+                <MudMenuItem @onclick="SubmitAllLogs">Submit All Logs</MudMenuItem>
             </ChildContent>
         </MudMenu>
     </div>
 </MudGrid>
 
 @code {
-    [CascadingParameter(Name="AppLayout")]
+    [CascadingParameter(Name = "AppLayout")]
     public AppLayout AppLayout { get; set; }
-    
+
     private int messageCount = 0;
 
     private void OpenCustomDialog()
@@ -36,7 +37,13 @@
         DialogService.Show<CustomLogDialog>("Process Custom Log Data", options);
     }
 
-private void OpenForceReadDialog()
+    private void SubmitAllLogs()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraLarge, FullWidth = true };
+        DialogService.Show<SubmitAllLogs>("Submit All Logs", options);
+    }
+
+    private void OpenForceReadDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraLarge, FullWidth = true };
         DialogService.Show<ForceReadDialog>("Force Read Log Files", options);
@@ -61,8 +68,8 @@ private void OpenForceReadDialog()
         }
     }
 
-	public void Dispose()
-	{
-	}
+    public void Dispose()
+    {
+    }
 
 }

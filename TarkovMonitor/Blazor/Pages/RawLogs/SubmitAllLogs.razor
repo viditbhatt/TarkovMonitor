@@ -1,0 +1,20 @@
+﻿@inject GameWatcher eft
+
+<MudButton DisableRipple=true Color="Color.Success" OnClick="Submit"> Submit All Logs</MudButton>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Cancel() => MudDialog.Cancel();
+
+    string sampleText = "";
+
+    // Grab list of watchers from GameWatcher and populate the dropdown
+    private GameLogType gameLogType = GameLogType.Application;
+
+    public void Submit()
+    {
+        eft.ProcessAllLogs();
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

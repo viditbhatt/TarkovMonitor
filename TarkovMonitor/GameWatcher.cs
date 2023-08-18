@@ -43,6 +43,7 @@ namespace TarkovMonitor
 
         public GameWatcher()
         {
+            LogsPath = @"C:\\Battlestate Games\\EFT\\Logs"; //hardcoding this is bad
             Monitors = new();
             raidInfo = new RaidInfo();
             processTimer = new System.Timers.Timer(TimeSpan.FromSeconds(30).TotalMilliseconds)
@@ -327,10 +328,23 @@ namespace TarkovMonitor
             
         }
 
+        public void ProcessAllLogs()
+        {
+            Dictionary<DateTime, string> logFolders = GetLogFolders();
+
+            foreach (string path in logFolders.Values)
+            {
+                ProcessLogs(path);
+            }
+        }
+
         // Process the log files in the specified folder
         public void ProcessLogs(string folderPath)
         {
+            int accessErrCount = 0;
+
             var logFiles = Directory.GetFiles(folderPath);
+
             // TODO: This could be improved by processing lines in the order they were created
             // rather than a full file at a time, this could be valuable for future features
             foreach (string logFile in logFiles)
@@ -342,26 +356,37 @@ namespace TarkovMonitor
                 {
                     logType = GameLogType.Application;
                     validType = true;
-                } else if (logFile.Contains("notifications.log"))
+                }
+                else if (logFile.Contains("notifications.log"))
                 {
                     logType = GameLogType.Notifications;
                     validType = true;
-                } else if (logFile.Contains("traces.log"))
+                }
+                else if (logFile.Contains("traces.log"))
                 {
                     logType = GameLogType.Traces;
                     validType = false;
                     // Traces are not currently used, so skip them
                     continue;
-                } else
+                }
+                else
                 {
                     // We're not a known log type, so skip this file
                     continue;
                 }
 
-                // Read the file into memory using UTF-8 encoding
-                var fileContents = File.ReadAllText(logFile, Encoding.UTF8);
+                try
+                {
+                    // Read the file into memory using UTF-8 encoding
+                    var fileContents = File.ReadAllText(logFile, Encoding.UTF8);
 
-                GameWatcher_NewLogData(this, new NewLogDataEventArgs { Type = logType, Data = fileContents });
+                    GameWatcher_NewLogData(this, new NewLogDataEventArgs { Type = logType, Data = fileContents });
+                }
+                catch (Exception e)
+                {
+                    accessErrCount++;
+                }
+
             }
         }
 
@@ -576,7 +601,7 @@ namespace TarkovMonitor
         public string Nickname { get; set; }
         public GroupUserLeaveEventArgs(JsonNode node)
         {
-            Nickname = node["Nickname"].ToString();
+            Nickname = node["Nickname"]?.ToString();
         }
     }
 	public class GroupReadyEventArgs : EventArgs
